@@ -1,1 +1,5 @@
-src/OpenAI_key.txt
+data/*
+src/finetune_chatGPT/wandb/*
+src/utils/__pycache__/*
+src/finetune_chatGPT/OpenAI_key.txt
+src/finetune_chatGPT/__pycache__/*

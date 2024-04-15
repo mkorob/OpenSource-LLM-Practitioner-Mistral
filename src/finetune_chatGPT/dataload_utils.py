@@ -1,8 +1,6 @@
-from datasets import Dataset, DatasetDict
 import pandas as pd 
 import os
 import glob
-from src.utils_src import map_label_to_completion
 
 ###########################################################################
 # UTILS SCRIPT 1- DATA LOADING
@@ -12,49 +10,43 @@ from src.utils_src import map_label_to_completion
 
 
 # Function 1 - Load train and evaluation datasets for finetuning
-def load_train_and_eval_datasets(data_dir: str, dataset_num: int, task_num: int, label_column, labelset, sample_size: int, full_label) \
-        -> DatasetDict[str, pd.DataFrame]:
-    datasets = DatasetDict()
+def load_train_and_eval_sets(data_dir: str, dataset_num: int, task_num: int, sample_size: int) \
+        -> dict[str, pd.DataFrame]:
+    datasets = dict()
 
     train_dataset_task_files = glob.glob(os.path.join(data_dir, f'ds_{dataset_num}__task_{task_num}_train_set*.csv'))
     eval_set_name = f'ds_{dataset_num}__task_{task_num}_eval_set'
-    eval_df = pd.read_csv(os.path.join(data_dir, eval_set_name + '.csv'))
-    eval_df[label_column] = eval_df[label_column].apply(lambda x: map_label_to_completion(x, task_num, full_label))
-    assert(sorted(eval_df[label_column].unique()) == sorted(labelset), "Unknown values in the test data!")
-    datasets["eval"] = Dataset.from_pandas(eval_df)
+    datasets[eval_set_name] = pd.read_csv(os.path.join(data_dir, eval_set_name + '.csv'))
 
     if sample_size == 'all':
         train_dfs_ = {fn.strip('.csv'): pd.read_csv(fn) for fn in train_dataset_task_files}
         datasets.update(train_dfs_)
     else:
         train_df_fn = f'ds_{dataset_num}__task_{task_num}_train_set_{sample_size}'
-        train_df = pd.read_csv(os.path.join(data_dir, train_df_fn + '.csv'))
-        train_df[label_column] = train_df[label_column].apply(lambda x: map_label_to_completion(x, task_num, full_label))
-        datasets["train"] = Dataset.from_pandas(train_df)
+        datasets[train_df_fn] = pd.read_csv(os.path.join(data_dir, train_df_fn + '.csv'))
+
         if train_df_fn not in [os.path.basename(fn).strip('.csv') for fn in train_dataset_task_files]:
             raise ValueError(f"Sample size {sample_size} not found for"
                              f" dataset {dataset_num} and task {task_num}")
 
-    return datasets
+    if dataset_num == 4:
+        for df in datasets.values():
+            df['text'] = df['title_h1'] + ' ' + df['text_200']
 
+    return datasets
 # Function 2 - Load full dataset only for zero-shot prediction
-def load_full_dataset(data_dir: str, dataset_num: int, task_num: int, label_column, labelset, sample_size, full_label) \
-        -> DatasetDict[str, pd.DataFrame]:
-    datasets = DatasetDict()
+def load_full_dataset(data_dir: str, dataset_num: int, task_num: int) \
+        -> dict[str, pd.DataFrame]:
+    datasets = dict()
+    eval_set_name = f'ds_{dataset_num}__task_{task_num}_eval_set_full'
+    datasets[eval_set_name] = pd.read_csv(os.path.join(data_dir, f'ds_{dataset_num}__task_{task_num}_full__for_zero_shot_classification.csv'))
 
-    #Check your name here
-    eval_set_name = f'ds_{dataset_num}__task_{task_num}_full__for_zero_shot_classification'
-    eval_df = pd.read_csv(os.path.join(data_dir, eval_set_name + '.csv'))
-    eval_df[label_column] = eval_df[label_column].apply(lambda x: map_label_to_completion(x, task_num, full_label))
-    assert(sorted(eval_df[label_column].unique()) == sorted(labelset), "Unknown values in the test data!")
-    datasets["eval"] = Dataset.from_pandas(eval_df)
-    #just to not break the trainer, not needed
-    train_df_fn = f'ds_{dataset_num}__task_{task_num}_train_set_{sample_size}'
-    train_df = pd.read_csv(os.path.join(data_dir, train_df_fn + '.csv'))
-    train_df[label_column] = train_df[label_column].map(str)
-    datasets["train"] = Dataset.from_pandas(train_df)
+    if dataset_num == 4:
+        for df in datasets.values():
+            df['text'] = df['title_h1'] + ' ' + df['text_200']
 
     return datasets
+
 
 def load_dataset_task_prompt_mappings(dataset_num, task_num, dataset_task_mappings_fp):
 
