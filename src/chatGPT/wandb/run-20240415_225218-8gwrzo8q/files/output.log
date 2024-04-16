@@ -1,0 +1,9 @@
+This is where the user prompt starts:
+Now, is the following tweet RELEVANT or IRRELEVANT to content moderation?
+{text}
+Check for errors in the prediction set:
+No errors found
+Uploading chatGPT_template_1_ds_1__task_1_eval_set_full to OpenAI
+Error getting predictions. Retrying...
+
+  0%|          | 0/1935 [00:05<?, ?it/s]
