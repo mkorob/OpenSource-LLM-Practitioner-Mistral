@@ -2,7 +2,7 @@ from datasets import Dataset, DatasetDict
 import pandas as pd 
 import os
 import glob
-from label_utils import map_label_to_completion
+from src.label_utils import map_label_to_completion
 
 ###########################################################################
 # UTILS SCRIPT 1- DATA LOADING
