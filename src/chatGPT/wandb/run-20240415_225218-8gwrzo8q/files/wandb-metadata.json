@@ -1,0 +1,44 @@
+{
+    "os": "Windows-10-10.0.22631-SP0",
+    "python": "3.10.12",
+    "heartbeatAt": "2024-04-15T20:52:21.710863",
+    "startedAt": "2024-04-15T20:52:18.791949",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "<python with no main file>",
+    "codePathLocal": null,
+    "git": {
+        "remote": "https://github.com/DigDemLab/OpenSource-LLM-Practitioner-Guide.git",
+        "commit": "5a536875ef3abe5c551059646484377d20e16540"
+    },
+    "email": "maria.korobeynikova@uzh.ch",
+    "root": "C:/Users/maria/OneDrive/Documents/GitHub/DigDemLab/LLM-Comparisons_repo/OpenSource-LLM-Practitioner-Guide",
+    "host": "ThinkPadM",
+    "username": "maria",
+    "executable": "c:\\Users\\maria\\anaconda3\\envs\\llm_finetune_cp\\python.exe",
+    "cpu_count": 10,
+    "cpu_count_logical": 12,
+    "cpu_freq": {
+        "current": 1700.0,
+        "min": 0.0,
+        "max": 1700.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 1700.0,
+            "min": 0.0,
+            "max": 1700.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 951.6455039978027,
+            "used": 312.337947845459
+        }
+    },
+    "memory": {
+        "total": 15.68082046508789
+    }
+}
