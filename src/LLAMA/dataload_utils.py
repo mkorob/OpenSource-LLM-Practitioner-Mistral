@@ -29,7 +29,7 @@ def load_train_and_eval_datasets(data_dir: str, eval_set_name: str, train_set_na
     datasets["eval_wo_completion"] = Dataset.from_pandas(eval_df_wo_completion)
 
     # process trainset
-    train_df = _process_dataset(data_dir, dataset_num, task_num, train_set_name, label_column, labelset, full_label,
+    train_df = _process_dataset(data_dir, task_num, train_set_name, label_column, labelset, full_label,
                                 system_prompt, user_prompt_format, llama_2=llama_2)
 
     datasets["train"] = Dataset.from_pandas(train_df)
@@ -37,7 +37,7 @@ def load_train_and_eval_datasets(data_dir: str, eval_set_name: str, train_set_na
     return datasets
 
 
-def load_full_dataset(data_dir: str, dataset_name: str, ttask_num: int, label_column: str,labelset: list[str], full_label: bool, sample_size: int, system_prompt: str, user_prompt_format: str,llama_2: bool = False) \
+def load_full_dataset(data_dir: str, dataset_name: str, task_num: int, label_column: str,labelset: list[str], full_label: bool, sample_size: int, system_prompt: str, user_prompt_format: str,llama_2: bool = False) \
         -> DatasetDict[str, pd.DataFrame | Dataset]:
     datasets = DatasetDict()
 
