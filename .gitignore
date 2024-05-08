@@ -9,3 +9,6 @@ src/FLAN/wandb/*
 src/LLAMA/__pycache__
 src/FLAN/__pycache__
 src/LLAMA/hf_token.txt
+.DS_Store
+src/.DS_Store
+.DS_Store

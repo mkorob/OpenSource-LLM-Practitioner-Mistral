@@ -297,17 +297,23 @@ overflow-y: auto;
 border: 1px solid #ddd;
 border-radius: 4px;
 }
-.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-content: "\e259";
+.tabset-dropdown > .nav-tabs > li.active:before {
+content: "";
 font-family: 'Glyphicons Halflings';
 display: inline-block;
 padding: 10px;
 border-right: 1px solid #ddd;
 }
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-content: "\e258";
-font-family: 'Glyphicons Halflings';
+content: "";
 border: none;
+}
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+content: "";
+font-family: 'Glyphicons Halflings';
+display: inline-block;
+padding: 10px;
+border-right: 1px solid #ddd;
 }
 .tabset-dropdown > .nav-tabs > li.active {
 display: block;
@@ -391,7 +397,8 @@ chosen directory.</p>
 <div id="metas-llama-2-13b-and-llama-2-70b" class="section level3">
 <h3>3. Meta’s LLaMA-2-13B and LLaMA-2-70B</h3>
 <p><strong>Step 1:</strong> Go to Meta AI’s repository or the specific
-page hosting LLaMA-2-13B and LLaMA-2-70B models. (<a href="https://huggingface.co/meta-llama/Llama-2-13b">LLaMA-2-13b</a>, <a href="https://huggingface.co/meta-llama/Llama-2-70b">LLaMA-2-70b</a>)</p>
+page hosting LLaMA-2-13B and LLaMA-2-70B models. (<a href="https://huggingface.co/meta-llama/Llama-2-13b-hf">LLaMA-2-13b</a>,
+<a href="https://huggingface.co/meta-llama/Llama-2-70b-hf">LLaMA-2-70b</a>)</p>
 <p><strong>Step 2:</strong> Comply with the instructions on the site for
 downloading. This could entail agreeing to certain terms, registering,
 or directly downloading the models.</p>
