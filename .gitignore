@@ -1,10 +1,11 @@
 data/*
 src/finetune_chatGPT/wandb/*
 src/utils/__pycache__/*
-src/finetune_chatGPT/OpenAI_key.txt
+src/chatGPT/OpenAI_key.txt
 src/finetune_chatGPT/__pycache__/*
 models/*
 modelsgoogle/*
 src/FLAN/wandb/*
 src/LLAMA/__pycache__
 src/FLAN/__pycache__
+src/LLAMA/hf_token.txt
