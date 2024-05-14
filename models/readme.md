@@ -25,7 +25,7 @@ Before proceeding, ensure you have the following:
 **Step 3:** Download and extract the model files to your chosen directory.
 
 ### 3. Meta's LLaMA-2-13B and LLaMA-2-70B
-**Step 1:** Go to Meta AI's repository or the specific page hosting LLaMA-2-13B and LLaMA-2-70B models. ([LLaMA-2-13b](https://huggingface.co/meta-llama/Llama-2-13b), [LLaMA-2-70b](https://huggingface.co/meta-llama/Llama-2-70b))
+**Step 1:** Go to Meta AI's repository or the specific page hosting LLaMA-2-13B and LLaMA-2-70B models. ([LLaMA-2-13b](https://huggingface.co/meta-llama/Llama-2-13b-hf), [LLaMA-2-70b](https://huggingface.co/meta-llama/Llama-2-70b-hf))
 
 **Step 2:** Comply with the instructions on the site for downloading. This could entail agreeing to certain terms, registering, or directly downloading the models.
 
