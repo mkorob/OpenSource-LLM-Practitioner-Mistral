@@ -37,7 +37,7 @@ def load_train_and_eval_datasets(data_dir: str, eval_set_name: str, train_set_na
     return datasets
 
 
-def load_full_dataset(data_dir: str, dataset_name: str, task_num: int, label_column: str,labelset: list[str], full_label: bool, sample_size: int, system_prompt: str, user_prompt_format: str,llama_2: bool = False) \
+def load_full_dataset(data_dir: str, dataset_name: str, task_num: int, label_column: str,labelset: list[str], full_label: bool, system_prompt: str, user_prompt_format: str,llama_2: bool = False) \
         -> DatasetDict[str, pd.DataFrame | Dataset]:
     datasets = DatasetDict()
 

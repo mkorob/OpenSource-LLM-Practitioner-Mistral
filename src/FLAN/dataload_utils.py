@@ -12,7 +12,7 @@ from label_utils import map_label_to_completion
 
 
 # Function 1 - Load train and evaluation datasets for finetuning
-def load_train_and_eval_datasets(data_dir: str, eval_set_name: str, train_set_name: str, task_num: int, label_column, labelset, sample_size: int, full_label) \
+def load_train_and_eval_datasets(data_dir: str, eval_set_name: str, train_set_name: str, task_num: int, label_column, labelset, full_label) \
         -> DatasetDict[str, pd.DataFrame]:
     datasets = DatasetDict()
 
