@@ -1,7 +1,6 @@
 data/*
 src/finetune_chatGPT/wandb/*
 src/utils/__pycache__/*
-src/chatGPT/OpenAI_key.txt
 src/finetune_chatGPT/__pycache__/*
 models/*
 modelsgoogle/*
@@ -14,3 +13,5 @@ src/.DS_Store
 .DS_Store
 src/cache/*
 src/LLAMA/wandb/*
+src/chatGPT/wandb*
+src/chatGPT/OpenAI_key.txt

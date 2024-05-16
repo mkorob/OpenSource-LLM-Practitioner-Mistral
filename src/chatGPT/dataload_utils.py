@@ -10,41 +10,21 @@ import glob
 
 
 # Function 1 - Load train and evaluation datasets for finetuning
-def load_train_and_eval_sets(data_dir: str, dataset_num: int, task_num: int, sample_size: int) \
+def load_train_and_eval_sets(data_dir: str, train_set_name: str, eval_set_name: str) \
         -> dict[str, pd.DataFrame]:
     datasets = dict()
 
-    train_dataset_task_files = glob.glob(os.path.join(data_dir, f'ds_{dataset_num}__task_{task_num}_train_set*.csv'))
-    eval_set_name = f'ds_{dataset_num}__task_{task_num}_eval_set'
     datasets[eval_set_name] = pd.read_csv(os.path.join(data_dir, eval_set_name + '.csv'))
-
-    if sample_size == 'all':
-        train_dfs_ = {fn.strip('.csv'): pd.read_csv(fn) for fn in train_dataset_task_files}
-        datasets.update(train_dfs_)
-    else:
-        train_df_fn = f'ds_{dataset_num}__task_{task_num}_train_set_{sample_size}'
-        datasets[train_df_fn] = pd.read_csv(os.path.join(data_dir, train_df_fn + '.csv'))
-
-        if train_df_fn not in [os.path.basename(fn).strip('.csv') for fn in train_dataset_task_files]:
-            raise ValueError(f"Sample size {sample_size} not found for"
-                             f" dataset {dataset_num} and task {task_num}")
-
-    if dataset_num == 4:
-        for df in datasets.values():
-            df['text'] = df['title_h1'] + ' ' + df['text_200']
+    datasets[train_set_name] = pd.read_csv(os.path.join(data_dir, train_set_name + '.csv'))
 
     return datasets
-            
+
+
 # Function 2 - Load full dataset only for zero-shot prediction
-def load_full_dataset(dataset_dir: str, dataset_name: str, task_num: int) \
+def load_full_dataset(data_dir: str, dataset_name: str) \
         -> dict[str, pd.DataFrame]:
     datasets = dict()
-    eval_set_name = f'ds_{dataset_num}__task_{task_num}_eval_set_full'
-    datasets[eval_set_name] = pd.read_csv(os.path.join(data_dir, f'ds_{dataset_num}__task_{task_num}_full__for_zero_shot_classification.csv'))
-
-    if dataset_num == 4:
-        for df in datasets.values():
-            df['text'] = df['title_h1'] + ' ' + df['text_200']
+    datasets[dataset_name] = pd.read_csv(os.path.join(data_dir, f'{dataset_name}.csv'))
 
     return datasets
 
