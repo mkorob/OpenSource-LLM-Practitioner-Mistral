@@ -35,7 +35,7 @@ In this repository, we provide scripts and guidance for the following models:
 To utilize the scripts and guides provided in this repository, clone it to your local machine:
 
 ```bash
-git clone https://github.com/yourusername/PracticalOpenLLMGuide.git
+git clone https://github.com/yourusername/OpenSource-LLM-Practitioner-Guide.git
 ```
 
 
