@@ -15,3 +15,4 @@ src/cache/*
 src/LLAMA/wandb/*
 src/chatGPT/wandb*
 src/chatGPT/OpenAI_key.txt
+dataset_task_mappings.csv
