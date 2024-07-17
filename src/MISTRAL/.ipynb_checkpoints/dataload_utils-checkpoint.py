@@ -11,7 +11,7 @@ from label_utils import map_label_to_completion
 
 def load_train_and_eval_datasets(data_dir: str, eval_set_name: str, train_set_name: str, task_num: int, label_column: str,labelset: list[str], full_label: bool, sample_size: int,
                                  system_prompt: str, user_prompt_format: str,
-                                 llama_type: str) \
+                                 llama_2: bool = False) \
         -> DatasetDict[str, pd.DataFrame | Dataset]:
     datasets = DatasetDict()
 
@@ -20,24 +20,24 @@ def load_train_and_eval_datasets(data_dir: str, eval_set_name: str, train_set_na
 
     # Process evaluation set
     eval_df = _process_dataset(data_dir, task_num, eval_set_name, label_column, labelset, full_label,
-                               system_prompt, user_prompt_format, llama_2=llama_type)
+                               system_prompt, user_prompt_format, llama_2=llama_2)
     datasets["eval"] = Dataset.from_pandas(eval_df)
 
     eval_df_wo_completion = _process_dataset(data_dir, task_num, eval_set_name, label_column,
                                              labelset, full_label, system_prompt, user_prompt_format,
-                                             no_completion=True, llama_type=llama_type)
+                                             no_completion=True, llama_2=llama_2)
     datasets["eval_wo_completion"] = Dataset.from_pandas(eval_df_wo_completion)
 
     # process trainset
     train_df = _process_dataset(data_dir, task_num, train_set_name, label_column, labelset, full_label,
-                                system_prompt, user_prompt_format, llama_type=llama_type)
+                                system_prompt, user_prompt_format, llama_2=llama_2)
 
     datasets["train"] = Dataset.from_pandas(train_df)
 
     return datasets
 
 
-def load_full_dataset(data_dir: str, dataset_name: str, task_num: int, label_column: str,labelset: list[str], full_label: bool, system_prompt: str, user_prompt_format: str,llama_type: str) \
+def load_full_dataset(data_dir: str, dataset_name: str, task_num: int, label_column: str,labelset: list[str], full_label: bool, system_prompt: str, user_prompt_format: str,llama_2: bool = False) \
         -> DatasetDict[str, pd.DataFrame | Dataset]:
     datasets = DatasetDict()
 
@@ -46,33 +46,18 @@ def load_full_dataset(data_dir: str, dataset_name: str, task_num: int, label_col
 
     # Process evaluation set
     eval_df = _process_dataset(data_dir, task_num, dataset_name, label_column, labelset, full_label,
-                               system_prompt, user_prompt_format, no_completion = False, llama_type=llama_type)
+                               system_prompt, user_prompt_format, llama_2=llama_2)
     datasets["eval"] = Dataset.from_pandas(eval_df)
 
     eval_df_wo_completion = _process_dataset(data_dir, task_num, dataset_name, label_column,
                                              labelset, full_label, system_prompt, user_prompt_format,
-                                             no_completion=True, llama_type=llama_type)
+                                             no_completion=True, llama_2=llama_2)
     datasets["eval_wo_completion"] = Dataset.from_pandas(eval_df_wo_completion)
 
     return datasets
 
-
-def generate_prompt_select(llama_type):
-    if llama_type == "llama2":
-        llama_funct = generate_official_llama2_prompt
-    elif llama_type == "llama3":
-        llama_funct = generate_official_llama3_prompt
-    elif llama_type == "oasst_llama":
-        llama_funct = generate_prompt_oasst
-    else:
-        #will throw an error here if none of these types are called - prevents with proceeding
-        print("No matching function found - check the spelling of the type or add a function to generate_prompt")
-        return
-    return llama_funct
-
-
 def _process_dataset(data_dir, task_num, dataset_name, label_column, labelset, full_label,
-                     system_prompt, user_prompt_format, no_completion, llama_type):
+                     system_prompt, user_prompt_format, no_completion=False, llama_2=False):
     print(f"loading {os.path.join(data_dir, dataset_name + '.csv')}") 
     print(os.path.join(data_dir, dataset_name + '.csv'))
     df = pd.read_csv(os.path.join(data_dir, dataset_name + '.csv'))
@@ -85,8 +70,7 @@ def _process_dataset(data_dir, task_num, dataset_name, label_column, labelset, f
     assert all([label in labelset for label in df[label_column].unique().tolist()]), \
         "Unknown values in the test data!"
 
-    #generate_prompt = generate_prompt_oasst if not llama_2 else generate_official_llama2_prompt
-    generate_prompt = generate_prompt_select(llama_type)
+    generate_prompt = generate_prompt_oasst if not llama_2 else generate_official_llama2_prompt
 
     df['text'] = df.apply(
         lambda row: generate_prompt(
@@ -153,22 +137,3 @@ def generate_official_llama2_prompt(system_prompt, user_prompt, completion=None)
         code_template += f" {completion} </s>"
 
     return code_template
-
-
-def generate_official_llama3_prompt(system_prompt, user_prompt, completion=None):
-
-    system_prompt_str = f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>{clean_text(system_prompt)}<|eot_id|>"
-    user_prompt_str = f"<|start_header_id|>user<|end_header_id|>{clean_text(user_prompt)}<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
-
-   # EXAMPLE - <|begin_of_text|><|start_header_id|>system<|end_header_id|>
-
-    #You are a helpful AI assistant for travel tips and recommendations<|eot_id|><|start_header_id|>user<|end_header_id|>
-
-    #What can you help me with?<|eot_id|><|start_header_id|>assistant<|end_header_id|>
-    prompt = system_prompt_str + user_prompt_str
-    if completion is not None:
-        prompt += f"{completion}<|eot_id|>"
-    # Remove break lines
-    prompt = prompt.replace('\n', ' ')
-
-    return prompt

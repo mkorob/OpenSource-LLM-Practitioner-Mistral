@@ -144,6 +144,16 @@ def clean_text(text):
     return cleaned_text
 
 
+def generate_mistral_prompt(system_prompt, user_prompt, completion=None):
+    user_prompt = clean_text(user_prompt)
+
+    code_template = f"<s>[INST] {system_prompt}\n\n{user_prompt} [/INST]"
+    if completion is not None:
+        completion = clean_text(completion)
+        code_template += f" {completion} </s>"
+
+    return code_template
+
 def generate_official_llama2_prompt(system_prompt, user_prompt, completion=None):
     user_prompt = clean_text(user_prompt)
 
