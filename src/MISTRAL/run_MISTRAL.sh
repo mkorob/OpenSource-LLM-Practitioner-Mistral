@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH  --output=compute_jobs_log/llama3_zeroshot.out
+#SBATCH  --output=compute_jobs_log/llama3_zeroshot_view.out
 #SBATCH --ntasks=1
 #SBATCH --time=10:00:00
 #SBATCH --mem=64GB
