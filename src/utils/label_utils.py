@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from sklearn.metrics import (accuracy_score, ConfusionMatrixDisplay, classification_report, recall_score,
-                             precision_score, f1_score, precision_recall_fscore_support)
+                             precision_score, f1_score)
 
 ###########################################################################
 # UTILS SCRIPT 1- DATA LABELLING
@@ -26,7 +26,7 @@ task_to_display_labels = {
     },
 
     2: {
-        'full_name': ['PROBLEM', 'SOLUTION', 'BOTH','NEITHER'], 'short_name': ['A', 'B', 'C', 'D'],
+        'full_name': ['PROBLEM', 'SOLUTION', 'NEUTRAL'], 'short_name': ['A', 'B', 'C'],
     },
     3: {
         'full_name': ['ECONOMY', 'MORALITY', 'FAIRNESS AND EQUALITY', 'POLICY PRESCRIPTION AND EVALUATION',
@@ -74,12 +74,12 @@ def map_label_to_completion(label: str, task_num: int, full_label: bool = True) 
 
         elif task_num == 2:
             if full_label:
-                new_label = label.upper() #if label != 'Neither' else 'NEUTRAL'
-                assert new_label in ['SOLUTION', 'PROBLEM', 'NEITHER', 'BOTH']
+                new_label = label.upper() if label != 'Neither' else 'NEUTRAL'
+                assert new_label in ['SOLUTION', 'PROBLEM', 'NEUTRAL']
             else:
-                new_label_mapping = {'Problem': 'A', 'Solution': 'B', 'Both': 'C', 'Neither': 'D'}
+                new_label_mapping = {'Problem': 'A', 'Solution': 'B', 'Neutral': 'C', 'Neither': 'C'}
                 new_label = new_label_mapping[label]
-                assert new_label in ['A', 'B', 'C', 'D']
+                assert new_label in ['A', 'B', 'C']
 
         elif task_num == 3:
             if full_label:
@@ -214,49 +214,3 @@ def plot_count_and_normalized_confusion_matrix(y_true, y_pred, display_labels, l
     metrics = {metric_name: metric_func(y_true, y_pred) for metric_name, metric_func in metrics.items()}
 
     return fig, cls_report, metrics
-
-def plot_count_and_normalized_confusion_matrix_by_class(y_true, y_pred, display_labels, labels, xticks_rotation='horizontal',
-                                               metrics: dict = default_metrics):
-    # Print classification report
-    cls_report = classification_report(y_true, y_pred, output_dict=True)
-    pprint.pprint(cls_report)
-
-    # Create plot with two subplots
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5))
-
-    # Remove labels and display_labels not present in y_true
-    display_labels = [label for label in display_labels if label in y_true.unique()]
-    labels = [label for label in labels if label in y_true.unique()]
-
-    # Plot count confusion matrix
-    cm_disp = ConfusionMatrixDisplay.from_predictions(y_true, y_pred, labels=labels, display_labels=display_labels)
-    cm_disp.plot(ax=ax1, xticks_rotation=xticks_rotation)
-    ax1.set_title('Count Confusion Matrix')
-
-    # Plot normalized confusion matrix
-    cm_disp = ConfusionMatrixDisplay.from_predictions(y_true, y_pred, labels=labels, display_labels=display_labels,
-                                                      normalize='true')
-    cm_disp.plot(ax=ax2, xticks_rotation=xticks_rotation)
-    ax2.set_title('Normalized Confusion Matrix')
-
-    # Show plot
-    #plt.show()
-    #plt.close()
-
-    # Calculate metrics
-      # Calculate metrics
-    metrics_result = {}
-
-    for metric_name, metric_func in metrics.items():
-        metrics_result[metric_name] = metric_func(y_true, y_pred)
-
-    # Calculate class-wise metrics
-    precision, recall, f1, _ = precision_recall_fscore_support(y_true, y_pred, labels=labels, average=None)
-    class_metrics = {}
-    for i, label in enumerate(labels):
-        class_metrics[f'{label}_precision'] = precision[i]
-        class_metrics[f'{label}_recall'] = recall[i]
-        class_metrics[f'{label}_f1'] = f1[i]
-    metrics_result.update(class_metrics)
-
-    return fig, cls_report, metrics_result
