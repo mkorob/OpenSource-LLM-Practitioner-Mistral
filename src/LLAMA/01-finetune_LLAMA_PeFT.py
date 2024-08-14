@@ -59,7 +59,7 @@ MODEL_NAME = "meta-llama/Meta-Llama-3-8B-Instruct"
 # In order to run LLAMA-2 models, you need to register yourself at the HuggingFace model page (https://huggingface.co/meta-llama/Llama-2-70b-chat-hf). Then, you can either insert the token here (not recommended if sharing a repository on GitHub), or input it in the hf_token.txt as done here and ensure it is included in the .gitignore.
 
 # %%
-with open(os.path.join(module_dir, "hf_token.txt"), "r") as file:
+with open(os.path.join(module_dir, "src", "LLAMA", "hf_token.txt"), "r") as file:
     hf_token = file.read().strip()
 
 # %% [markdown]
@@ -117,10 +117,10 @@ os.environ['HF_HOME'] = cache_location
 task = args.task  # 
 
 # Dataset to finetune
-dataset = args.task  #
+dataset = args.dataset  #
 
 # Size of the sample to fine-tune
-sample_size = args.task  # 
+sample_size = args.sample_size  # 
 
 # Path to the directory to store the generated predictions
 output_dir = 'data'
@@ -144,7 +144,7 @@ data_dir = 'data'
 not_use_full_labels = False
 
 # Path to the dataset-task mappings file
-dataset_task_mappings_fp = os.path.normpath(os.path.join(module_dir, '..', '..', 'dataset_task_mappings.csv'))
+dataset_task_mappings_fp = os.path.normpath(os.path.join(module_dir, 'dataset_task_mappings.csv'))
 
 #Maximum length of prompt to be taken by the model as input (check documentation for current maximum length)
 max_prompt_len = 4096
@@ -301,17 +301,17 @@ datasets = load_train_and_eval_datasets(
 # Print examples from train set, eval set and evalset without completion
 print(f"Train set example with completion ({len(datasets['train'])} rows): ")
 print("-" * 50 + '\n')
-print(datasets["train"]["text"][0])
+#print(datasets["train"]["text"][0])
 print('\n\n')
 
 print(f"Eval set example with completion ({len(datasets['eval'])} rows): ")
 print("-" * 50 + '\n')
-print(datasets["eval"]["text"][0])
+#print(datasets["eval"]["text"][0])
 print('\n\n')
 
 print(f"Eval set without completion ({len(datasets['eval_wo_completion'])} rows): ")
 print("-" * 50 + '\n')
-print(datasets["eval_wo_completion"]["text"][0])
+#print(datasets["eval_wo_completion"]["text"][0])
 print('\n\n')
 
 # %% [markdown]
@@ -440,6 +440,8 @@ model = LlamaForCausalLM.from_pretrained(
 
 # %%
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, truncation_side="left", use_fast=True, token=hf_token)
+tokenizer.pad_token_id = tokenizer.eos_token_id
+tokenizer.padding_side = "right"
 
 # Default params from alpaca-lora generate script (commonly used)
 generation_config = GenerationConfig(
@@ -447,7 +449,8 @@ generation_config = GenerationConfig(
     top_p=top_p,
     top_k=top_k,
     do_sample=True,
-    max_new_tokens=max_new_tokens
+    max_new_tokens=max_new_tokens,
+    pad_token_id = tokenizer.pad_token_id
 )
 
 with torch.no_grad():
@@ -469,7 +472,7 @@ with torch.no_grad():
         )
 
         generated_text_minibatch = tokenizer.batch_decode(
-            outputs, skip_special_tokens=True, clean_up_tokenization_spaces=True
+            outputs, skip_special_tokens=False, clean_up_tokenization_spaces=True
         )
 
         predictions_out += generated_text_minibatch

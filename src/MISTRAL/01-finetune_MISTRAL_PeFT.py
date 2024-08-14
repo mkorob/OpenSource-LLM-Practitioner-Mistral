@@ -55,7 +55,7 @@ MODEL_NAME = "mistralai/Mistral-7B-Instruct-v0.3"
 
 # %%
 #cache_location = os.environ['HF_HOME']
-cache_location = "src/cache"
+cache_location = "../cache"
 
 os.environ['TRANSFORMERS_CACHE'] = cache_location
 os.environ['HF_HOME'] = cache_location
@@ -114,10 +114,10 @@ args = parser.parse_args()
 task = args.task # 
 
 # Dataset to finetune
-dataset = args.task  #
+dataset = args.dataset  #
 
 # Size of the sample to fine-tune
-sample_size = args.task  # 
+sample_size = args.sample_size # 
 
 # Path to the directory to store the generated predictions
 output_dir = 'data'
@@ -141,7 +141,7 @@ data_dir = 'data'
 not_use_full_labels = False
 
 # Path to the dataset-task mappings file
-dataset_task_mappings_fp = os.path.normpath(os.path.join(module_dir, '..', '..', 'dataset_task_mappings.csv'))
+dataset_task_mappings_fp = os.path.normpath(os.path.join(module_dir,'dataset_task_mappings.csv'))
 
 #Maximum length of prompt to be taken by the model as input (check documentation for current maximum length)
 max_prompt_len = 4096
@@ -228,6 +228,9 @@ set_all_seeds(seed)
 exp_name = run_name if run_name != '' else f'{MODEL_NAME}_ds_{dataset}_task_{int(task)}_sample_{sample_size}_epochs_{n_epochs}_prompt_max_len_{max_prompt_len}_batch_size_{batch_size}_grad_acc_{gradient_accumulation_steps}'
 exp_name = exp_name.replace('.', '_')
 
+with open(os.path.join(module_dir, "src", "MISTRAL", "hf_token.txt"), "r") as file:
+    hf_token = file.read().strip()
+
 # Initialize the Weights and Biases run
 if WANDB_PROJECT_NAME != "":
     wandb.init(
@@ -299,17 +302,17 @@ datasets = load_train_and_eval_datasets(
 # Print examples from train set, eval set and evalset without completion
 print(f"Train set example with completion ({len(datasets['train'])} rows): ")
 print("-" * 50 + '\n')
-print(datasets["train"]["text"][0])
+#print(datasets["train"]["text"][0])
 print('\n\n')
 
 print(f"Eval set example with completion ({len(datasets['eval'])} rows): ")
 print("-" * 50 + '\n')
-print(datasets["eval"]["text"][0])
+#print(datasets["eval"]["text"][0])
 print('\n\n')
 
 print(f"Eval set without completion ({len(datasets['eval_wo_completion'])} rows): ")
 print("-" * 50 + '\n')
-print(datasets["eval_wo_completion"]["text"][0])
+#print(datasets["eval_wo_completion"]["text"][0])
 print('\n\n')
 
 # %% [markdown]
@@ -317,7 +320,9 @@ print('\n\n')
 
 # %%
 # Load the tokenizer
-tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, cache_dir = cache_location)
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, cache_dir = cache_location, token = hf_token)
+tokenizer.padding_side = 'right'
+tokenizer.pad_token = tokenizer.unk_token
 
 
 bnb_config = BitsAndBytesConfig(
@@ -327,7 +332,7 @@ bnb_config = BitsAndBytesConfig(
     bnb_4bit_compute_dtype=torch.bfloat16
 )
 
-model = AutoModelForCausalLM.from_pretrained(MODEL_NAME, quantization_config=bnb_config, cache_dir = cache_location)
+model = AutoModelForCausalLM.from_pretrained(MODEL_NAME, quantization_config=bnb_config, cache_dir = cache_location, token = hf_token)
 
 # %% [markdown]
 # ### Prepare the model for training
@@ -400,7 +405,8 @@ print("Merging LoRA weights...")
 mistral_model = AutoModelForCausalLM.from_pretrained(
     MODEL_NAME,
     device_map='auto',
-    cache_dir = cache_location
+    cache_dir = cache_location,
+    token = hf_token
 )
 
 # It needs enough memory to load it in 16 bit, a little over 80GB, so more than 1 A100
@@ -428,10 +434,19 @@ time.sleep(10)
 # %%
 # Reload the model in its quantized version
 model = AutoModelForCausalLM.from_pretrained(
-    merged_model_path, quantization_config=bnb_config, device_map="auto", token=hf_token)
+    merged_model_path, quantization_config=bnb_config)
+
+print("testing token ids")
+print(tokenizer.pad_token_id)
+print(tokenizer.eos_token_id)
+print(model.generation_config.pad_token_id)
+print(model.generation_config.eos_token_id)
 
 # %%
-tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, truncation_side="left", use_fast=True, token=hf_token)
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, truncation_side="left", token = hf_token)
+tokenizer.padding_side = 'right'
+tokenizer.pad_token = tokenizer.unk_token
+
 
 # Default params from alpaca-lora generate script (commonly used)
 generation_config = GenerationConfig(
@@ -439,7 +454,8 @@ generation_config = GenerationConfig(
     top_p=top_p,
     top_k=top_k,
     do_sample=True,
-    max_new_tokens=max_new_tokens
+    max_new_tokens=max_new_tokens,
+    pad_token_id = tokenizer.pad_token_id
 )
 
 with torch.no_grad():

@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH  --output=compute_jobs_log/llama3_zeroshot_view.out
+#SBATCH  --output=compute_jobs_log/mistral_ds1_t1_500.out
 #SBATCH --ntasks=1
 #SBATCH --time=10:00:00
 #SBATCH --mem=64GB
@@ -8,7 +8,10 @@
 
 module load multigpu
 module load mamba
-source activate llm_finetune_v2
-export PYTHONPATH=$PYTHONPATH:/scratch/mkorob/OpenSource-LLM-Practitioner-Guide-llama3
+source activate llm_finetune_mistral_v2
+export PYTHONPATH=$PYTHONPATH:/scratch/mkorob/OpenSource-LLM-Practitioner-Mistral/src/utils
 
-python src/MISTRAL/01b-few_zeroshot_MISTRAL_PeFT_script.py
+python src/MISTRAL/01-finetune_MISTRAL_PeFT.py \
+--dataset 1 \
+--task 1 \
+--sample_size 500

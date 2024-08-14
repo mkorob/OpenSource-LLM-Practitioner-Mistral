@@ -25,8 +25,8 @@ task_to_display_labels = {
         'full_name': ['RELEVANT', 'IRRELEVANT'], 'short_name': ['A', 'B'],
     },
 
-    2: {
-        'full_name': ['PROBLEM', 'SOLUTION', 'BOTH','NEITHER'], 'short_name': ['A', 'B', 'C', 'D'],
+   2: {
+        'full_name': ['PROBLEM', 'SOLUTION', 'NEUTRAL'], 'short_name': ['A', 'B', 'C'],
     },
     3: {
         'full_name': ['ECONOMY', 'MORALITY', 'FAIRNESS AND EQUALITY', 'POLICY PRESCRIPTION AND EVALUATION',
@@ -74,13 +74,13 @@ def map_label_to_completion(label: str, task_num: int, full_label: bool = True) 
 
         elif task_num == 2:
             if full_label:
-                new_label = label.upper() #if label != 'Neither' else 'NEUTRAL'
-                assert new_label in ['SOLUTION', 'PROBLEM', 'NEITHER', 'BOTH']
+                new_label = label.upper() if label != 'Neither' else 'NEUTRAL'
+                assert new_label in ['SOLUTION', 'PROBLEM', 'NEUTRAL']
             else:
-                new_label_mapping = {'Problem': 'A', 'Solution': 'B', 'Both': 'C', 'Neither': 'D'}
+                new_label_mapping = {'Problem': 'A', 'Solution': 'B', 'Neither': 'C'}
                 new_label = new_label_mapping[label]
-                assert new_label in ['A', 'B', 'C', 'D']
-
+                assert new_label in ['A', 'B', 'C']
+                
         elif task_num == 3:
             if full_label:
                 new_label_mapping = {

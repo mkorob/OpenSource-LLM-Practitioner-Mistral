@@ -42,7 +42,6 @@ parser.add_argument("--task", type=int, required=True, help="Type of task to run
                     choices=[1, 2, 3, 4, 5, 6])
 parser.add_argument("--dataset", type=int, required=True, help="Dataset to run inference on",
                     choices=[1, 2, 3, 4])
-parser.add_argument('--sample_size', type=int, default=50, choices=[50, 100, 250, 500, 1000, 1500])
 
 args = parser.parse_args()
 
@@ -50,21 +49,20 @@ args = parser.parse_args()
 # %%
 WANDB_PROJECT_NAME = "llama3_annotations_llm_comparison"
 # Name of the model to finetune (this script was tested on LLAMA-2 70b, LLAMA-2 13b, and OASST-LLAMA 30b)
-MODEL_NAME = "meta-llama/Meta-Llama-3-8B-Instruct"
+MODEL_NAME = "mistralai/Mistral-7B-Instruct-v0.1"
 
 # %% [markdown]
 # In order to run LLAMA-2 models, you need to register yourself at the HuggingFace model page (https://huggingface.co/meta-llama/Llama-2-70b-chat-hf). Then, you can either insert the token here (not recommended if sharing a repository on GitHub), or input it in the hf_token.txt as done here and ensure it is included in the .gitignore.
-
-# %%
-with open(os.path.join(module_dir, "hf_token.txt"), "r") as file:
+with open(os.path.join(module_dir, "src", "MISTRAL", "hf_token.txt"), "r") as file:
     hf_token = file.read().strip()
+# %%
 
 # %% [markdown]
 # This is an optional parameter to run if your default transformers cache location does not contain enough storage to load the LLAMA models. Otherwise, you can keep it as is.
 
 # %%
 #cache_location = os.environ['HF_HOME']
-cache_location = "src/cache"
+cache_location = "../cache"
 
 os.environ['TRANSFORMERS_CACHE'] = cache_location
 os.environ['HF_HOME'] = cache_location
@@ -138,7 +136,7 @@ data_dir = 'data'
 not_use_full_labels = False
 
 # Path to the dataset-task mappings file
-dataset_task_mappings_fp = os.path.normpath(os.path.join(module_dir, '..', '..', 'dataset_task_mappings.csv'))
+dataset_task_mappings_fp = os.path.normpath(os.path.join(module_dir, 'dataset_task_mappings.csv'))
 
 #Maximum length of prompt to be taken by the model as input (check documentation for current maximum length)
 max_prompt_len = 4096
@@ -158,7 +156,7 @@ top_p = 0.75
 top_k = 40
 
 # %%
-dataset_name = f'ds_{dataset}__task_{task}_eval_set'
+dataset_name = f'ds_{dataset}__task_{task}_full__for_zero_shot_classification'
 
 # %% [markdown]
 # **Customizing for Your Own Tasks:**
@@ -264,12 +262,12 @@ datasets = load_full_dataset(
 # %%
 print(f"Eval set example with completion ({len(datasets['eval'])} rows): ")
 print("-" * 50 + '\n')
-print(datasets["eval"]["text"][0])
+#print(datasets["eval"]["text"][0])
 print('\n\n')
 
 print(f"Eval set without completion ({len(datasets['eval_wo_completion'])} rows): ")
 print("-" * 50 + '\n')
-print(datasets["eval_wo_completion"]["text"][0])
+#print(datasets["eval_wo_completion"]["text"][0])
 print('\n\n')
 
 
@@ -278,9 +276,7 @@ print('\n\n')
 
 # %%
 # Load the tokenizer
-tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, truncation_side="left", token=hf_token, cache_dir = "../cache")
-tokenizer.pad_token = tokenizer.eos_token
-tokenizer.padding_side = "right"
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, truncation_side="left", cache_dir = cache_location, token = hf_token)
 
 bnb_config = BitsAndBytesConfig(
     load_in_4bit=True,
@@ -289,13 +285,13 @@ bnb_config = BitsAndBytesConfig(
     bnb_4bit_compute_dtype=torch.bfloat16
 )
 
-model = AutoModelForCausalLM.from_pretrained(MODEL_NAME, quantization_config=bnb_config, cache_dir = cache_location)
+model = AutoModelForCausalLM.from_pretrained(MODEL_NAME, quantization_config=bnb_config, cache_dir = cache_location, token = hf_token)
 
 # %% [markdown]
 # ### Run Predictions
 
 # %%
-tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, truncation_side="left", token=hf_token)
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, truncation_side="left", token = hf_token)
 tokenizer.pad_token = tokenizer.eos_token
 tokenizer.padding_side = "right"
 

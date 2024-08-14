@@ -20,7 +20,7 @@ def load_train_and_eval_datasets(data_dir: str, eval_set_name: str, train_set_na
 
     # Process evaluation set
     eval_df = _process_dataset(data_dir, task_num, eval_set_name, label_column, labelset, full_label,
-                               system_prompt, user_prompt_format, llama_2=llama_type)
+                               system_prompt, user_prompt_format, no_completion = False, llama_type=llama_type)
     datasets["eval"] = Dataset.from_pandas(eval_df)
 
     eval_df_wo_completion = _process_dataset(data_dir, task_num, eval_set_name, label_column,
@@ -30,7 +30,7 @@ def load_train_and_eval_datasets(data_dir: str, eval_set_name: str, train_set_na
 
     # process trainset
     train_df = _process_dataset(data_dir, task_num, train_set_name, label_column, labelset, full_label,
-                                system_prompt, user_prompt_format, llama_type=llama_type)
+                                system_prompt, user_prompt_format, no_completion=False, llama_type=llama_type)
 
     datasets["train"] = Dataset.from_pandas(train_df)
 
@@ -64,6 +64,8 @@ def generate_prompt_select(llama_type):
         llama_funct = generate_official_llama3_prompt
     elif llama_type == "oasst_llama":
         llama_funct = generate_prompt_oasst
+    elif llama_type == "mistral":
+        llama_funct = generate_mistral_prompt
     else:
         #will throw an error here if none of these types are called - prevents with proceeding
         print("No matching function found - check the spelling of the type or add a function to generate_prompt")

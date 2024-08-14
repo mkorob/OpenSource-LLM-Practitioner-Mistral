@@ -20,7 +20,7 @@ def load_train_and_eval_datasets(data_dir: str, eval_set_name: str, train_set_na
 
     # Process evaluation set
     eval_df = _process_dataset(data_dir, task_num, eval_set_name, label_column, labelset, full_label,
-                               system_prompt, user_prompt_format, llama_2=llama_type)
+                               system_prompt, user_prompt_format, no_completion = False, llama_type=llama_type)
     datasets["eval"] = Dataset.from_pandas(eval_df)
 
     eval_df_wo_completion = _process_dataset(data_dir, task_num, eval_set_name, label_column,
@@ -30,7 +30,7 @@ def load_train_and_eval_datasets(data_dir: str, eval_set_name: str, train_set_na
 
     # process trainset
     train_df = _process_dataset(data_dir, task_num, train_set_name, label_column, labelset, full_label,
-                                system_prompt, user_prompt_format, llama_type=llama_type)
+                                system_prompt, user_prompt_format, no_completion = False, llama_type=llama_type)
 
     datasets["train"] = Dataset.from_pandas(train_df)
 
@@ -103,6 +103,8 @@ def load_dataset_task_prompt_mappings(dataset_num, task_num, dataset_task_mappin
 
     dataset_task_mappings = pd.read_csv(dataset_task_mappings_fp, encoding='unicode_escape')
 
+    print(dataset_num)
+    print(task_num)
     dataset_idx = dataset_task_mappings.index[
         (dataset_task_mappings["dataset_number"] == dataset_num) & (dataset_task_mappings["task_number"] == task_num)]
 

@@ -15,6 +15,7 @@ sys.path.append(os.path.abspath(os.path.join(module_dir, "src" "utils")))
 
 # %%
 import tqdm
+import argparse
 from transformers import (AutoTokenizer,
                           LlamaForCausalLM, BitsAndBytesConfig, GenerationConfig)
 import pandas as pd
@@ -24,6 +25,14 @@ import random
 import wandb
 
 from dataload_utils import load_full_dataset, load_dataset_task_prompt_mappings
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--task", type=int, required=True, help="Type of task to run inference on",
+                    choices=[1, 2, 3, 4, 5, 6])
+parser.add_argument("--dataset", type=int, required=True, help="Dataset to run inference on",
+                    choices=[1, 2, 3, 4])
+
+args = parser.parse_args()
 
 # %% [markdown]
 # ### Setup Arguments and Data
@@ -45,7 +54,7 @@ MODEL_NAME = "meta-llama/Meta-Llama-3-8B-Instruct"
 # In order to run LLAMA-2 models, you need to register yourself at the HuggingFace model page (https://huggingface.co/meta-llama/Llama-2-70b-chat-hf). Then, you can either insert the token here (not recommended if sharing a repository on GitHub), or input it in the hf_token.txt as done here and ensure it is included in the .gitignore.
 
 # %%
-with open(os.path.join(module_dir, "hf_token.txt"), "r") as file:
+with open(os.path.join(module_dir, "src", "LLAMA", "hf_token.txt"), "r") as file:
     hf_token = file.read().strip()
 
 # %% [markdown]
@@ -100,10 +109,10 @@ os.environ['HF_HOME'] = cache_location
 # Configuration Variables
 
 # Type of task to run inference on
-task = 2  # 
+task = args.task  # 
 
 # Dataset to run inference on
-dataset = 5  #
+dataset = args.dataset #
 
 # Path to the directory to store the generated predictions
 output_dir = 'data'
@@ -127,7 +136,7 @@ data_dir = 'data'
 not_use_full_labels = False
 
 # Path to the dataset-task mappings file
-dataset_task_mappings_fp = os.path.normpath(os.path.join(module_dir, '..', '..', 'dataset_task_mappings.csv'))
+dataset_task_mappings_fp = os.path.normpath(os.path.join(module_dir, 'dataset_task_mappings.csv'))
 
 #Maximum length of prompt to be taken by the model as input (check documentation for current maximum length)
 max_prompt_len = 4096
@@ -147,8 +156,7 @@ top_p = 0.75
 top_k = 40
 
 # %%
-dataset_name = f'ds_{dataset}__task_{task}_eval_set'
-
+dataset_name = f'ds_{dataset}__task_{task}_full__for_zero_shot_classification'
 # %% [markdown]
 # **Customizing for Your Own Tasks:**
 # If you plan to run a custom task or use a dataset that is not predefined, you will need to make modifications to the `label_utils` file. This file contains all mappings for different datasets and tasks. Adding your custom task or dataset involves defining the new task or dataset number and specifying its characteristics and mappings in the `label_utils` file. This ensures that your custom task or dataset integrates seamlessly with the existing framework for training and inference.
@@ -250,9 +258,6 @@ datasets = load_full_dataset(
     llama_type=llama_type)
 
 # %%
-df = pd.read_csv("data/ds_5__task_2_eval_set.csv")
-
-# %%
 print(f"Eval set example with completion ({len(datasets['eval'])} rows): ")
 print("-" * 50 + '\n')
 print(datasets["eval"]["text"][0])
@@ -263,15 +268,13 @@ print("-" * 50 + '\n')
 print(datasets["eval_wo_completion"]["text"][0])
 print('\n\n')
 
-# %%
-df['problem_solution_ra'][0].upper()
 
 # %% [markdown]
 # ### Define the model, tokenizers, data collator
 
 # %%
 # Load the tokenizer
-tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, truncation_side="left", token=hf_token, cache_dir = "../cache")
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, use_fast = True, truncation_side="left", token=hf_token, cache_dir = "../cache")
 tokenizer.pad_token = tokenizer.eos_token
 tokenizer.padding_side = "right"
 
@@ -296,7 +299,7 @@ model = LlamaForCausalLM.from_pretrained(MODEL_NAME, quantization_config=bnb_con
 # ### Run Predictions
 
 # %%
-tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, truncation_side="left", token=hf_token)
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, use_fast = True, truncation_side="left", token=hf_token)
 tokenizer.pad_token = tokenizer.eos_token
 tokenizer.padding_side = "right"
 
@@ -329,7 +332,7 @@ with torch.no_grad():
         )
 
         generated_text_minibatch = tokenizer.batch_decode(
-            outputs, skip_special_tokens=True, clean_up_tokenization_spaces=True
+            outputs, skip_special_tokens=False, clean_up_tokenization_spaces=True
         )
 
         predictions_out += generated_text_minibatch
