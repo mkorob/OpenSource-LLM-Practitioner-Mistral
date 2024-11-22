@@ -17,11 +17,7 @@ src/LLAMA/wandb/*
 src/chatGPT/wandb*
 src/chatGPT/OpenAI_key.txt
 dataset_task_mappings.csv
-wandb/*
-compute_jobs_log/*
-compute_jobs_log_old/*
-job_scripts/*
-src/MISTRAL/wandb/*
-src/MISTRAL/.ipynb_checkpoints/*
-src/MISTRAL/__pycache__/*
-src/LLAMA/job_scripts/*
+src/LLAMA/accuracies_*
+src/LLAMA/02-measure_performance_Llama copy.ipynb
+src/LLAMA/02-measure_performance_Llama.ipynb
+src/LLAMA/02-measure_performance_Llama.ipynb
